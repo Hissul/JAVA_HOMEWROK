@@ -2,9 +2,9 @@ package Homework4;
 
 public class Student {
 	
-	public String name;
-	public Float averageMark;
-	public String examAdmission;
+	private String name;
+	private Float averageMark;
+	private String examAdmission;
 	
 	
 	public String getName() {
