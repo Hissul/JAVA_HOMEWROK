@@ -1,104 +1,71 @@
 package Homework4;
 
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.Math;
-import java.util.Arrays;
-
-import java.util.function.UnaryOperator;
-import java.util.function.BinaryOperator;
-import java.util.function.Supplier;
-import java.util.function.Predicate;
-import java.util.function.Consumer;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 public class Main {
 
 	public static void main(String[] args) {
 		
-		Student[] students = new Student[10];
+		Book[] books = {new Book("book_1", "author_1"), new Book("book_2", "author_2"), new Book("book_3", "author_3")};
+		Bookshelf bookshelf = new Bookshelf(1, books);
 		
-		StudentInit(students);
-		StudentMakr(students);		
-	
-		PrintStudentToFile(students);
+		String fileName = "books.txt";
 		
-		OtherExamples();
-
-	}
-	
-	// инициализация массива студентов
-	public static void StudentInit(Student[] students) {
+		srializeObject(bookshelf, fileName);
+		Bookshelf deserializedBookshelf = deserializeObject(fileName);
 		
-		for(int i = 0 ; i < students.length ; ++i) {
-			students[i] = new Student();			
-			students[i].setName("Student " + i);
+		if(deserializedBookshelf != null) {
+			System.out.println(deserializedBookshelf);
 		}
 	}
 	
-	// средняя оценка + допуск
-	public static void StudentMakr(Student[] students) {
+	// serialize
+	public static void srializeObject(Bookshelf bookshelf, String fileName) {
 		
-		Predicate<Float> examAdmission = (mark) -> mark >= 7;
-		
-		Supplier<Float> getRandomNumber = () -> (float)Math.random() * 12;
-		
-		for(int i = 0 ; i < students.length ; ++i) {			
-			students[i].setAverageMark(getRandomNumber.get());
-			students[i].setExamAdmission(examAdmission.test(students[i].getAverageMark()) == true ? "Допущен" : "Забей!");						
-		}
-	}
-	
-	// сейв в файл
-	public static void PrintStudentToFile(Student[] students) {	
-		
-		try(FileWriter writer = new FileWriter( "StudentList.txt" , true )){
+		try {
 			
-			Consumer<String> nameConsumer = (name) -> {
-				try {
-					writer.write("\t" + name + " : ");
-				} catch (IOException e) {					
-					System.out.println(e);
-				}
-			};
-			
-			Consumer<String> averageConsumer = (average) -> {
-				try {
-					writer.write(average + "\t");
-				} catch (IOException e) {					
-					System.out.println(e);
-				}
-			};
-			
-			Consumer<String> examConsumer = (exam) -> {
-				try {
-					writer.write(exam + "\n");
-				} catch (IOException e) {					
-					System.out.println(e);
-				}
-			};
-			
-			for(int i = 0 ; i < students.length ; ++i) {
-				nameConsumer.accept(students[i].getName());
-				averageConsumer.accept(students[i].getAverageMark().toString());
-				examConsumer.accept(students[i].getExamAdmission());
-			}
+			FileOutputStream outputStream = new FileOutputStream(fileName);
+			try (ObjectOutputStream outputObjectStream = new ObjectOutputStream(outputStream)) {
+				outputObjectStream.writeObject(bookshelf);
+			}			
 			
 		}
 		catch(IOException ex) {
 			System.out.println(ex);
-		}	
-		
+		}
 	}
 	
-	// 
-	public static void OtherExamples() {
+	// deserialize
+	public static Bookshelf deserializeObject(String fileName) {
 		
-		UnaryOperator<Integer> square = x -> x * x;
-		System.out.println("UnaryOperator -> " + square.apply(8));
-		
-		
-		BinaryOperator<Integer> compare = BinaryOperator.maxBy((x, y) -> (x > y) ? 1 : ((x == y) ? 0 : -1));
-		System.out.println("BinaryOperator -> " + compare.apply(8,6));
+		try {
+			
+			FileInputStream inputStream = new FileInputStream(fileName);
+			try (ObjectInputStream inputObjectStream = new ObjectInputStream(inputStream)) {
+				Bookshelf shelf = (Bookshelf)inputObjectStream.readObject();
+				
+				return shelf;
+			}			
+		}
+		catch(ClassNotFoundException ex) {
+			System.out.println(ex);
+		}
+		catch(IOException ex) {
+			System.out.println(ex);
+		}
+		return null;
 	}
+	
+
+	
+
+	
+
+	
+
 
 }
